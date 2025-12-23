@@ -61,6 +61,11 @@ import './custom-clipboard-copy.js';
   capturePhotoEl.addEventListener('capture-photo:video-play', evt => {
     scanFrameEl.hidden = false;
     resizeScanFrame(evt.detail.video);
+    
+    // Ensure we have the video element reference
+    capturePhotoVideoEl = evt.detail.video || capturePhotoEl.shadowRoot?.querySelector('video');
+    log('Video element initialized:', !!capturePhotoVideoEl);
+    
     scan();
 
     const trackSettings = capturePhotoEl.getTrackSettings();
@@ -118,7 +123,17 @@ import './custom-clipboard-copy.js';
 
   dropzoneEl.accept = ACCEPTED_MIME_TYPES.join(',');
 
-  const capturePhotoVideoEl = capturePhotoEl.shadowRoot.querySelector('video');
+  // Wait for custom element to be fully initialized before accessing shadow DOM
+  let capturePhotoVideoEl;
+  
+  // Try to get video element, with fallback for timing issues
+  const getVideoElement = () => {
+    if (!capturePhotoVideoEl) {
+      capturePhotoVideoEl = capturePhotoEl.shadowRoot?.querySelector('video');
+    }
+    return capturePhotoVideoEl;
+  };
+
   const formats = await window.BarcodeDetector.getSupportedFormats();
   const barcodeDetector = new window.BarcodeDetector({ formats });
   const { value: settings = {} } = await getSettings();
@@ -307,6 +322,7 @@ import './custom-clipboard-copy.js';
 
   async function createResult(value, resultDialog) {
     if (!value || !resultDialog) {
+      console.error('createResult: missing value or resultDialog');
       return;
     }
 
@@ -379,13 +395,37 @@ import './custom-clipboard-copy.js';
   }
 
   async function scan() {
-    log('Scanning...');
-
     scanInstructionsEl.hidden = false;
 
     try {
       let barcode = {};
-      barcode = await detectBarcode(capturePhotoVideoEl);
+      const videoEl = getVideoElement();
+      if (!videoEl) {
+        console.error('Video element not found in scan()');
+        if (shouldRepeatScan) {
+          rafId = window.requestAnimationFrame(() => scan());
+        }
+        return;
+      }
+      
+      // Check if video is actually playing
+      if (videoEl.readyState < 2) {
+        if (shouldRepeatScan) {
+          rafId = window.requestAnimationFrame(() => scan());
+        }
+        return;
+      }
+      
+      barcode = await detectBarcode(videoEl);
+      
+      // Ensure barcode has valid data
+      if (!barcode || !barcode.rawValue) {
+        throw new Error('No rawValue in detected barcode');
+      }
+      
+      // Barcode successfully detected! Log it.
+      console.log('✓ Barcode detected:', barcode.rawValue);
+      
       window.cancelAnimationFrame(rafId);
       emptyResults(cameraResultsEl);
       createResult(barcode.rawValue, cameraResultsEl);
@@ -397,7 +437,7 @@ import './custom-clipboard-copy.js';
       vibrate();
       return;
     } catch (err) {
-      // Fail silently...
+      // Silently continue scanning (no barcode found yet)
     }
 
     if (shouldRepeatScan) {
