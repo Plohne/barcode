@@ -86,32 +86,53 @@ function showToast(message, type = 'success') {
     return capturePhotoVideoEl;
   };
 
+  // AudioContext (lazy init to handle mobile gesture requirement)
+  let audioCtx = null;
+  const getAudioContext = () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    // Resume if suspended (mobile browsers)
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  };
+
   // Beep function
-  const beep = (() => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (!audioCtx) return () => {};
+  const beep = async (duration = 200, frequency = 860, volume = 0.03) => {
+    const { value: settings } = await getSettings();
+    // Default to true if settings not set
+    if (settings?.beep === false) return;
 
-    return async (duration, frequency, volume) => {
-      const { value: settings } = await getSettings();
-      if (!settings?.beep) return;
-
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+    try {
+      const ctx = getAudioContext();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
       oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      gainNode.gain.value = volume || 0.03;
-      oscillator.frequency.value = frequency || 860;
+      gainNode.connect(ctx.destination);
+      gainNode.gain.value = volume;
+      oscillator.frequency.value = frequency;
       oscillator.type = 'square';
-      oscillator.start(audioCtx.currentTime);
-      oscillator.stop(audioCtx.currentTime + ((duration || 200) / 1000));
-    };
-  })();
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + (duration / 1000));
+    } catch (err) {
+      console.log('Beep failed:', err);
+    }
+  };
 
   // Vibrate function
   async function vibrate(duration = 100) {
     const { value: settings } = await getSettings();
-    if (!settings?.vibrate || typeof navigator.vibrate !== 'function') return;
-    try { navigator.vibrate(duration); } catch {}
+    // Default to true if settings not set
+    if (settings?.vibrate === false) return;
+    
+    if (typeof navigator.vibrate !== 'function') return;
+    try { 
+      navigator.vibrate(duration); 
+    } catch (err) {
+      console.log('Vibrate failed:', err);
+    }
   }
 
   // Resize scan frame

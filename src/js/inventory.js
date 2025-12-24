@@ -75,26 +75,18 @@ function renderItems(items) {
     li.className = 'inventory-item';
     li.dataset.id = item.id;
     li.innerHTML = `
-      <div class="item-info">
-        <p class="item-name">${escapeHtml(item.productName || item.barcode)}</p>
-        <span class="item-barcode">${item.barcode}</span>
-      </div>
+      <p class="item-name">${escapeHtml(item.productName || item.barcode)}</p>
       <div class="item-controls">
         <button type="button" class="qty-btn" data-action="decrease">−</button>
-        <span class="item-qty">${item.quantity}</span>
+        <input type="number" class="item-qty-input" value="${item.quantity}" min="0" max="99" data-action="set-qty">
         <button type="button" class="qty-btn" data-action="increase">+</button>
-        <button type="button" class="remove-btn" data-action="remove" title="Fjern">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-          </svg>
-        </button>
+        <button type="button" class="remove-btn" data-action="remove" title="Fjern">🗑</button>
       </div>
     `;
     inventoryList.appendChild(li);
   });
 
-  // Add event listeners
+  // Add event listeners for buttons
   inventoryList.querySelectorAll('.qty-btn, .remove-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const action = btn.dataset.action;
@@ -122,6 +114,28 @@ function renderItems(items) {
           await updateFridgeItemQuantity(itemId, item.quantity - 1);
           await loadItems();
         }
+      }
+    });
+  });
+
+  // Add event listeners for quantity input
+  inventoryList.querySelectorAll('.item-qty-input').forEach(input => {
+    input.addEventListener('change', async (e) => {
+      const itemEl = input.closest('.inventory-item');
+      const itemId = itemEl.dataset.id;
+      const newQty = parseInt(input.value) || 0;
+      
+      if (newQty <= 0) {
+        if (confirm('Fjerne fra kjøleskapet?')) {
+          await removeFromFridge(itemId);
+          await loadItems();
+        } else {
+          // Reset to 1 if user cancels
+          input.value = 1;
+        }
+      } else {
+        await updateFridgeItemQuantity(itemId, newQty);
+        await loadItems();
       }
     });
   });
