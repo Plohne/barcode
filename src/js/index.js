@@ -9,6 +9,20 @@ import { toastAlert } from './toast-alert.js';
 import { debounce } from './utils/debounce.js';
 import './custom-clipboard-copy.js';
 
+// Firebase / Fridge imports
+import { initializeFirebase } from './services/firebase-config.js';
+import { 
+  getCurrentFridgeCode, 
+  setCurrentFridgeCode,
+  joinFridge, 
+  createFridge, 
+  addToFridge, 
+  getFridgeItems,
+  updateFridgeItemQuantity,
+  removeFromFridge
+} from './services/fridge-service.js';
+import { getProductByBarcode, createProduct } from './services/product-service.js';
+
 (async function () {
   const NO_BARCODE_DETECTED = 'No barcode detected';
   const ACCEPTED_MIME_TYPES = ['image/jpg', 'image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif'];
@@ -33,6 +47,32 @@ import './custom-clipboard-copy.js';
   const supportedFormatsEl = document.getElementById('supportedFormats');
   let shouldRepeatScan = true;
   let rafId;
+
+  // Fridge UI elements
+  const fridgeBtn = document.getElementById('fridgeBtn');
+  const fridgeBtnText = document.getElementById('fridgeBtnText');
+  const fridgeDialog = document.getElementById('fridgeDialog');
+  const fridgeSetup = document.getElementById('fridgeSetup');
+  const fridgeConnected = document.getElementById('fridgeConnected');
+  const currentFridgeCodeEl = document.getElementById('currentFridgeCode');
+  const fridgeItemsList = document.getElementById('fridgeItemsList');
+  const emptyFridgeMessage = document.getElementById('emptyFridgeMessage');
+  const productDialog = document.getElementById('productDialog');
+  const productForm = document.getElementById('productForm');
+  const productBarcodeInput = document.getElementById('productBarcode');
+  const productNameInput = document.getElementById('productName');
+  const productQuantityInput = document.getElementById('productQuantity');
+
+  // Initialize Firebase
+  try {
+    await initializeFirebase();
+    log('Firebase initialized successfully');
+  } catch (err) {
+    console.error('Firebase initialization failed:', err);
+  }
+
+  // Initialize fridge UI
+  initFridgeUI();
 
   if (!('BarcodeDetector' in window)) {
     try {
@@ -430,6 +470,10 @@ import './custom-clipboard-copy.js';
       emptyResults(cameraResultsEl);
       createResult(barcode.rawValue, cameraResultsEl);
       addToHistory(barcode.rawValue);
+      
+      // Handle fridge integration
+      handleBarcodeDetected(barcode.rawValue);
+      
       scanInstructionsEl.hidden = true;
       scanBtn.hidden = false;
       scanFrameEl.hidden = true;
@@ -462,6 +506,10 @@ import './custom-clipboard-copy.js';
           emptyResults(fileResultsEl);
           createResult(barcode.rawValue, fileResultsEl);
           addToHistory(barcode.rawValue);
+          
+          // Handle fridge integration
+          handleBarcodeDetected(barcode.rawValue);
+          
           beep(200, 860, 0.03, 'square');
           vibrate();
         } catch (err) {
@@ -587,5 +635,264 @@ import './custom-clipboard-copy.js';
       emptyHistory();
     }
   });
-}());
 
+  // ==========================================
+  // FRIDGE FUNCTIONALITY
+  // ==========================================
+
+  function initFridgeUI() {
+    const currentCode = getCurrentFridgeCode();
+    updateFridgeButtonState(currentCode);
+
+    // Fridge button click
+    fridgeBtn?.addEventListener('click', () => {
+      const code = getCurrentFridgeCode();
+      if (code) {
+        showFridgeContents();
+      } else {
+        showFridgeSetup();
+      }
+      fridgeDialog?.showModal();
+    });
+
+    // Close dialog on backdrop click
+    fridgeDialog?.addEventListener('click', evt => {
+      if (evt.target === evt.currentTarget) {
+        fridgeDialog.close();
+      }
+    });
+
+    // Tab switching
+    document.querySelectorAll('.fridge-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.fridge-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.fridge-tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + 'Tab')?.classList.add('active');
+      });
+    });
+
+    // Join fridge form
+    document.getElementById('joinFridgeForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('joinCode')?.value?.trim().toLowerCase();
+      const password = document.getElementById('joinPassword')?.value || null;
+
+      if (!code) return;
+
+      try {
+        const result = await joinFridge(code, password);
+        if (result.success) {
+          setCurrentFridgeCode(code);
+          updateFridgeButtonState(code);
+          showFridgeContents();
+          toastAlert('Koblet til kjøleskap: ' + code, 'success');
+        } else {
+          toastAlert(result.error || 'Kunne ikke koble til', 'danger');
+        }
+      } catch (err) {
+        toastAlert('Feil: ' + err.message, 'danger');
+      }
+    });
+
+    // Create fridge form
+    document.getElementById('createFridgeForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('createCode')?.value?.trim().toLowerCase();
+      const password = document.getElementById('createPassword')?.value || null;
+
+      if (!code) return;
+
+      try {
+        const result = await createFridge(code, password);
+        if (result.success) {
+          setCurrentFridgeCode(code);
+          updateFridgeButtonState(code);
+          showFridgeContents();
+          toastAlert('Kjøleskap opprettet: ' + code, 'success');
+        } else {
+          toastAlert(result.error || 'Kunne ikke opprette', 'danger');
+        }
+      } catch (err) {
+        toastAlert('Feil: ' + err.message, 'danger');
+      }
+    });
+
+    // Leave fridge button
+    document.getElementById('leaveFridgeBtn')?.addEventListener('click', () => {
+      setCurrentFridgeCode(null);
+      updateFridgeButtonState(null);
+      showFridgeSetup();
+      toastAlert('Frakoblet kjøleskap', 'info');
+    });
+
+    // Product form submit
+    productForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleAddProduct();
+    });
+
+    // Skip product button
+    document.getElementById('skipProductBtn')?.addEventListener('click', () => {
+      productDialog?.close();
+    });
+
+    // Product dialog backdrop click
+    productDialog?.addEventListener('click', evt => {
+      if (evt.target === evt.currentTarget) {
+        productDialog.close();
+      }
+    });
+  }
+
+  function updateFridgeButtonState(code) {
+    if (fridgeBtnText) {
+      fridgeBtnText.textContent = code ? code : 'Kjøleskap';
+    }
+    if (fridgeBtn) {
+      fridgeBtn.classList.toggle('connected', !!code);
+    }
+  }
+
+  function showFridgeSetup() {
+    if (fridgeSetup) fridgeSetup.style.display = 'block';
+    if (fridgeConnected) fridgeConnected.style.display = 'none';
+  }
+
+  async function showFridgeContents() {
+    const code = getCurrentFridgeCode();
+    if (!code) {
+      showFridgeSetup();
+      return;
+    }
+
+    if (fridgeSetup) fridgeSetup.style.display = 'none';
+    if (fridgeConnected) fridgeConnected.style.display = 'block';
+    if (currentFridgeCodeEl) currentFridgeCodeEl.textContent = code;
+
+    // Load items
+    await refreshFridgeItems();
+  }
+
+  async function refreshFridgeItems() {
+    const code = getCurrentFridgeCode();
+    if (!code || !fridgeItemsList) return;
+
+    try {
+      const items = await getFridgeItems(code);
+      fridgeItemsList.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        if (emptyFridgeMessage) emptyFridgeMessage.style.display = 'block';
+        return;
+      }
+
+      if (emptyFridgeMessage) emptyFridgeMessage.style.display = 'none';
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'fridge-item';
+        li.innerHTML = `
+          <span class="fridge-item-name">${item.productName || item.barcode}</span>
+          <div class="fridge-item-controls">
+            <button type="button" class="qty-btn" data-action="decrease" data-id="${item.id}">−</button>
+            <span class="fridge-item-qty">${item.quantity}</span>
+            <button type="button" class="qty-btn" data-action="increase" data-id="${item.id}">+</button>
+            <button type="button" class="remove-btn" data-action="remove" data-id="${item.id}">🗑</button>
+          </div>
+        `;
+        fridgeItemsList.appendChild(li);
+      });
+
+      // Add event listeners for quantity buttons
+      fridgeItemsList.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          const action = btn.dataset.action;
+          const item = items.find(i => i.id === id);
+          if (!item) return;
+
+          const newQty = action === 'increase' ? item.quantity + 1 : item.quantity - 1;
+          if (newQty < 1) {
+            if (confirm('Fjerne varen fra kjøleskapet?')) {
+              await removeFromFridge(code, id);
+            }
+          } else {
+            await updateFridgeItemQuantity(code, id, newQty);
+          }
+          await refreshFridgeItems();
+        });
+      });
+
+      fridgeItemsList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (confirm('Fjerne varen fra kjøleskapet?')) {
+            await removeFromFridge(code, btn.dataset.id);
+            await refreshFridgeItems();
+          }
+        });
+      });
+
+    } catch (err) {
+      console.error('Error loading fridge items:', err);
+      toastAlert('Kunne ikke laste innhold', 'danger');
+    }
+  }
+
+  // Called when a barcode is detected
+  async function handleBarcodeDetected(barcode) {
+    const code = getCurrentFridgeCode();
+    if (!code) {
+      // Not connected to a fridge, just show barcode normally
+      return;
+    }
+
+    // Check if product exists in our database
+    const product = await getProductByBarcode(barcode);
+
+    if (product) {
+      // Product exists, add directly to fridge
+      try {
+        await addToFridge(code, barcode, product.name, 1);
+        toastAlert(`${product.name} lagt til i kjøleskapet`, 'success');
+      } catch (err) {
+        toastAlert('Kunne ikke legge til: ' + err.message, 'danger');
+      }
+    } else {
+      // Product doesn't exist, ask for name
+      showProductDialog(barcode);
+    }
+  }
+
+  function showProductDialog(barcode) {
+    if (!productDialog || !productBarcodeInput || !productNameInput || !productQuantityInput) return;
+    
+    productBarcodeInput.value = barcode;
+    productNameInput.value = '';
+    productQuantityInput.value = '1';
+    productDialog.showModal();
+    productNameInput.focus();
+  }
+
+  async function handleAddProduct() {
+    const barcode = productBarcodeInput?.value;
+    const name = productNameInput?.value?.trim();
+    const quantity = parseInt(productQuantityInput?.value) || 1;
+    const code = getCurrentFridgeCode();
+
+    if (!barcode || !name || !code) return;
+
+    try {
+      // Save product to database for future use
+      await createProduct(barcode, name);
+      
+      // Add to fridge
+      await addToFridge(code, barcode, name, quantity);
+      
+      productDialog?.close();
+      toastAlert(`${name} lagt til i kjøleskapet`, 'success');
+    } catch (err) {
+      toastAlert('Feil: ' + err.message, 'danger');
+    }
+  }
+}());

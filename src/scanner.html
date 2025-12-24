@@ -15,6 +15,8 @@
   <meta name="color-scheme" content="light dark">
   <link rel="stylesheet" href="css/water.css">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/cookie-consent.css">
+  <link rel="stylesheet" href="css/fridge.css">
   <script src="./js/navbar.js"></script>
   <link rel="stylesheet" href="./css/navbar.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -35,6 +37,15 @@
   </noscript>
 
   <div class="global-actions" id="globalActions">
+    <button id="fridgeBtn" title="Kjøleskap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-12zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v12a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 14.5v-12z"/>
+        <path d="M5 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/>
+        <path d="M4 7h8v1H4z"/>
+      </svg>
+      <span id="fridgeBtnText">Kjøleskap</span>
+    </button>
+
     <button id="historyBtn" title="History">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock"
         viewBox="0 0 16 16">
@@ -353,14 +364,110 @@
 
   <p class="supported-formats" id="supportedFormats"></p>
 
+  <!-- Fridge Modal -->
+  <dialog id="fridgeDialog" class="modal fridge-modal">
+    <header>
+      Kjøleskap
+      <form method="dialog">
+        <button type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+          <span class="visually-hidden">Lukk</span>
+        </button>
+      </form>
+    </header>
+
+    <div id="fridgeContent">
+      <!-- Join/Create tabs when no fridge connected -->
+      <div id="fridgeSetup" class="fridge-setup">
+        <div class="fridge-tabs">
+          <button type="button" class="fridge-tab active" data-tab="join">Bli med</button>
+          <button type="button" class="fridge-tab" data-tab="create">Opprett nytt</button>
+        </div>
+
+        <div id="joinTab" class="fridge-tab-content active">
+          <form id="joinFridgeForm">
+            <label for="joinCode">Kjøleskapskode</label>
+            <input type="text" id="joinCode" placeholder="f.eks. stillbekk-familie" required>
+            
+            <label for="joinPassword">Passord (hvis påkrevd)</label>
+            <input type="password" id="joinPassword" placeholder="Valgfritt">
+            
+            <button type="submit" class="fridge-btn-primary">Bli med</button>
+          </form>
+        </div>
+
+        <div id="createTab" class="fridge-tab-content">
+          <form id="createFridgeForm">
+            <label for="createCode">Velg en kode</label>
+            <input type="text" id="createCode" placeholder="f.eks. min-familie" required pattern="[a-z0-9-]+" title="Bare små bokstaver, tall og bindestrek">
+            
+            <label for="createPassword">Passord (valgfritt)</label>
+            <input type="password" id="createPassword" placeholder="La stå tom for åpent kjøleskap">
+            
+            <button type="submit" class="fridge-btn-primary">Opprett kjøleskap</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Fridge contents when connected -->
+      <div id="fridgeConnected" class="fridge-connected" style="display: none;">
+        <div class="fridge-header">
+          <span id="currentFridgeCode"></span>
+          <button type="button" id="leaveFridgeBtn" class="fridge-btn-small">Bytt kjøleskap</button>
+        </div>
+        
+        <h3>Innhold</h3>
+        <ul id="fridgeItemsList" class="fridge-items-list"></ul>
+        
+        <div id="emptyFridgeMessage" class="empty-message">
+          Kjøleskapet er tomt. Skann en strekkode for å legge til varer!
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Product Info Modal (shown after scanning) -->
+  <dialog id="productDialog" class="modal product-modal">
+    <header>
+      Legg til i kjøleskap
+      <form method="dialog">
+        <button type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+          </svg>
+          <span class="visually-hidden">Lukk</span>
+        </button>
+      </form>
+    </header>
+
+    <form id="productForm">
+      <input type="hidden" id="productBarcode">
+      
+      <label for="productName">Produktnavn</label>
+      <input type="text" id="productName" placeholder="Skriv inn produktnavn" required>
+      
+      <label for="productQuantity">Antall</label>
+      <input type="number" id="productQuantity" value="1" min="1" max="99">
+      
+      <div class="product-actions">
+        <button type="submit" class="fridge-btn-primary">Legg til</button>
+        <button type="button" id="skipProductBtn" class="fridge-btn-secondary">Hopp over</button>
+      </div>
+    </form>
+  </dialog>
+
   <footer>
     <p>
+      <a href="privacy.html">Personvern</a> |
       Licensed under <a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noopener">The MIT License
         (MIT)</a>
     </p>
   </footer>
 
   <script src="./js/register-service-worker.js" type="module"></script>
+  <script src="./js/cookie-consent.js" type="module"></script>
   <script src="./js/index.js" type="module"></script>
 </body>
 

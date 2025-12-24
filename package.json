@@ -59,6 +59,7 @@
     "@georapbox/resize-observer-element": "~2.0.0",
     "@georapbox/web-share-element": "~3.1.0",
     "barcode-detector": "~2.2.2",
+    "firebase": "~12.7.0",
     "idb-keyval": "~6.2.1"
   },
   "browserslist": "> 0.5%, last 2 versions, not dead"

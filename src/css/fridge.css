@@ -1,0 +1,743 @@
+/* src/css/fridge.css */
+
+/* Fridge Dialog */
+.fridge-dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: var(--background-body, #fff);
+}
+
+.fridge-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.fridge-modal-container {
+  padding: 1.5rem;
+  position: relative;
+}
+
+.fridge-modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.fridge-modal-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.fridge-modal-subtitle {
+  margin: 0;
+  color: var(--text-muted, #666);
+  font-size: 0.9rem;
+}
+
+/* Tabs */
+.fridge-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--background-alt, #f5f5f5);
+  padding: 0.25rem;
+  border-radius: 10px;
+}
+
+.fridge-tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted, #666);
+  transition: all 0.2s;
+}
+
+.fridge-tab:hover {
+  color: var(--text-main, #333);
+}
+
+.fridge-tab.active {
+  background: var(--background-body, #fff);
+  color: var(--text-main, #333);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form */
+.fridge-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group .optional {
+  font-weight: normal;
+  color: var(--text-muted, #888);
+}
+
+.form-group input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--background-body, #fff);
+  color: var(--text-main, #333);
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--focus, #007bff);
+}
+
+.form-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted, #888);
+}
+
+/* Buttons */
+.primary-btn {
+  padding: 0.875rem 1.5rem;
+  background: var(--button-base, #007bff);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--button-hover, #0056b3);
+}
+
+.primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted, #888);
+  padding: 0.25rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: var(--background-alt, #f0f0f0);
+}
+
+/* Fridge Indicator */
+.fridge-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.fridge-indicator.disconnected {
+  background: var(--background-alt, #f0f0f0);
+  border: 1px dashed var(--border, #ccc);
+}
+
+.fridge-indicator.disconnected:hover {
+  background: var(--background-body, #e8e8e8);
+}
+
+.fridge-indicator.connected {
+  background: var(--background-alt, #e8f5e9);
+  border: 1px solid var(--border, #c8e6c9);
+}
+
+.fridge-icon {
+  font-size: 1.1rem;
+}
+
+.fridge-name {
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.switch-fridge-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.switch-fridge-btn:hover {
+  opacity: 1;
+}
+
+/* Fridge List */
+.fridge-panel {
+  padding: 1rem;
+}
+
+.fridge-list h3 {
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-count {
+  font-weight: normal;
+  color: var(--text-muted, #888);
+  font-size: 0.875rem;
+}
+
+.fridge-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted, #888);
+}
+
+.fridge-empty p {
+  margin: 0.5rem 0;
+}
+
+.fridge-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fridge-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background-body, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border, #eee);
+}
+
+.fridge-item-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--background-alt, #f5f5f5);
+}
+
+.fridge-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fridge-item-image .no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.fridge-item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.fridge-item-details h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fridge-item-details .barcode {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+  font-family: monospace;
+}
+
+.fridge-item-details .expiry {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #e53935;
+}
+
+.fridge-item-quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 50%;
+  background: var(--background-body, #fff);
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  color: var(--text-main, #333);
+}
+
+.qty-btn:hover {
+  background: var(--background-alt, #f0f0f0);
+}
+
+.qty-value {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+/* Product Form Dialog */
+.product-dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: var(--background-body, #fff);
+}
+
+.product-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.product-form-container {
+  padding: 1.5rem;
+  position: relative;
+}
+
+.product-form-container h2 {
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.barcode-display {
+  background: var(--background-alt, #f5f5f5);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.barcode-display label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #888);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.barcode-display strong {
+  font-family: monospace;
+  font-size: 1.25rem;
+}
+
+.image-upload-area {
+  border: 2px dashed var(--border, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 0.5rem;
+}
+
+.image-upload-area:hover {
+  border-color: var(--focus, #007bff);
+  background: var(--background-alt, #f8f9fa);
+}
+
+.image-upload-area.dragover {
+  border-color: var(--focus, #007bff);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.image-preview {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #888);
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 8px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions button {
+  flex: 1;
+}
+
+.secondary-btn {
+  padding: 0.875rem 1.5rem;
+  background: var(--background-alt, #f0f0f0);
+  color: var(--text-main, #333);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: var(--border, #e0e0e0);
+}
+
+/* Fridge Modal (using existing modal styles) */
+.fridge-modal header,
+.product-modal header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border, #333);
+  font-weight: 600;
+}
+
+.fridge-modal,
+.product-modal {
+  max-width: 420px;
+  width: 90vw;
+}
+
+/* Tab content visibility */
+.fridge-tab-content {
+  display: none;
+}
+
+.fridge-tab-content.active {
+  display: block;
+}
+
+/* Fridge setup forms */
+.fridge-setup form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.fridge-setup label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.fridge-setup input {
+  padding: 0.75rem;
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--background, #1a1a2e);
+  color: var(--text, #e0e0e0);
+}
+
+/* Primary and secondary buttons */
+.fridge-btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: var(--links, #6db3f2);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.fridge-btn-primary:hover {
+  background: var(--links-hover, #9ecbf7);
+}
+
+.fridge-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.fridge-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fridge-btn-small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  background: transparent;
+  color: var(--text-muted, #999);
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Connected fridge view */
+.fridge-connected {
+  padding: 1rem;
+}
+
+.fridge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border, #333);
+}
+
+.fridge-header span {
+  font-weight: 600;
+  color: var(--links, #6db3f2);
+}
+
+.fridge-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.fridge-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--background-alt, #2d2d2d);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.fridge-item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.fridge-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fridge-item-qty {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text, #e0e0e0);
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  opacity: 0.6;
+}
+
+.remove-btn:hover {
+  opacity: 1;
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--text-muted, #888);
+  padding: 2rem 1rem;
+  font-style: italic;
+}
+
+/* Product dialog */
+.product-modal form {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-modal label {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.product-modal input {
+  padding: 0.75rem;
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--background, #1a1a2e);
+  color: var(--text, #e0e0e0);
+}
+
+.product-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.product-actions button {
+  flex: 1;
+}
+
+/* Fridge button connected state */
+#fridgeBtn.connected {
+  color: var(--links, #6db3f2);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .fridge-dialog,
+  .product-dialog {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+  
+  .fridge-tabs {
+    background: #2d2d2d;
+  }
+  
+  .fridge-tab.active {
+    background: #3d3d3d;
+    color: #fff;
+  }
+  
+  .form-group input {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+  
+  .fridge-item {
+    background: #2d2d2d;
+    border-color: #444;
+  }
+  
+  .qty-btn {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+}
+
+/* Light mode overrides */
+@media (prefers-color-scheme: light) {
+  .fridge-setup input,
+  .product-modal input {
+    background: #fff;
+    border-color: #ddd;
+    color: #333;
+  }
+  
+  .fridge-btn-primary {
+    background: #0d6efd;
+    color: #fff;
+  }
+  
+  .fridge-btn-primary:hover {
+    background: #0b5ed7;
+  }
+  
+  .fridge-item {
+    background: #f5f5f5;
+  }
+  
+  .qty-btn {
+    background: #fff;
+    border-color: #ddd;
+    color: #333;
+  }
+}
