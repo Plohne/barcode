@@ -1,0 +1,280 @@
+// src/js/scanner.js - Simplified scanner for fridge app
+import '@georapbox/resize-observer-element/dist/resize-observer-defined.js';
+import { CapturePhoto } from '@georapbox/capture-photo-element/dist/capture-photo.js';
+import { getSettings, setSettings } from './services/storage.js';
+import { toastAlert } from './toast-alert.js';
+import './custom-clipboard-copy.js';
+
+// Firebase / Fridge imports
+import { initializeFirebase } from './services/firebase-config.js';
+import { 
+  getCurrentFridgeCode,
+  addToFridge
+} from './services/fridge-service.js';
+import { getProductByBarcode, createProduct } from './services/product-service.js';
+
+(async function () {
+  // Check if logged in
+  const currentFridgeCode = getCurrentFridgeCode();
+  if (!currentFridgeCode) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const capturePhotoEl = document.querySelector('capture-photo');
+  const cameraResultsEl = document.getElementById('cameraResults');
+  const scanInstructionsEl = document.getElementById('scanInstructions');
+  const scanBtn = document.getElementById('scanBtn');
+  const scanFrameEl = document.getElementById('scanFrame');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsDialog = document.getElementById('settingsDialog');
+  const settingsForm = document.forms['settings-form'];
+  const productDialog = document.getElementById('productDialog');
+  const productForm = document.getElementById('productForm');
+  const productBarcodeInput = document.getElementById('productBarcode');
+  const productNameInput = document.getElementById('productName');
+  const productQuantityInput = document.getElementById('productQuantity');
+
+  let shouldRepeatScan = true;
+  let rafId;
+  let capturePhotoVideoEl = null;
+
+  // Initialize Firebase
+  try {
+    await initializeFirebase();
+    console.log('Firebase ready');
+  } catch (err) {
+    console.error('Firebase init error:', err);
+  }
+
+  // Load BarcodeDetector
+  if (!('BarcodeDetector' in window)) {
+    try {
+      await import('barcode-detector');
+      console.log('Using BarcodeDetector polyfill.');
+    } catch (err) {
+      return toastAlert('Strekkodeskanning støttes ikke i denne nettleseren.', 'danger');
+    }
+  }
+
+  const formats = await window.BarcodeDetector.getSupportedFormats();
+  const barcodeDetector = new window.BarcodeDetector({ formats });
+
+  // Load settings
+  const { value: settings = { beep: true, vibrate: true } } = await getSettings();
+  Object.entries(settings).forEach(([key, value]) => {
+    const input = settingsForm?.querySelector(`[name="${key}"]`);
+    if (input) input.checked = value;
+  });
+
+  // Video element getter
+  const getVideoElement = () => {
+    if (!capturePhotoVideoEl) {
+      capturePhotoVideoEl = capturePhotoEl?.shadowRoot?.querySelector('video');
+    }
+    return capturePhotoVideoEl;
+  };
+
+  // Beep function
+  const beep = (() => {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) return () => {};
+
+    return async (duration, frequency, volume) => {
+      const { value: settings } = await getSettings();
+      if (!settings?.beep) return;
+
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      gainNode.gain.value = volume || 0.03;
+      oscillator.frequency.value = frequency || 860;
+      oscillator.type = 'square';
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + ((duration || 200) / 1000));
+    };
+  })();
+
+  // Vibrate function
+  async function vibrate(duration = 100) {
+    const { value: settings } = await getSettings();
+    if (!settings?.vibrate || typeof navigator.vibrate !== 'function') return;
+    try { navigator.vibrate(duration); } catch {}
+  }
+
+  // Resize scan frame
+  function resizeScanFrame(videoEl) {
+    if (!videoEl || !scanFrameEl) return;
+    const rect = videoEl.getBoundingClientRect();
+    scanFrameEl.style.cssText = `width: ${Math.min(rect.width * 0.8, 280)}px; height: ${Math.min(rect.height * 0.5, 200)}px`;
+  }
+
+  // Detect barcode
+  function detectBarcode(source) {
+    return new Promise((resolve, reject) => {
+      barcodeDetector.detect(source).then(results => {
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results[0]);
+        } else {
+          reject({ message: 'No barcode detected' });
+        }
+      }).catch(reject);
+    });
+  }
+
+  // Main scan loop
+  async function scan() {
+    if (scanInstructionsEl) scanInstructionsEl.hidden = false;
+
+    try {
+      const videoEl = getVideoElement();
+      if (!videoEl || videoEl.readyState < 2) {
+        if (shouldRepeatScan) {
+          rafId = window.requestAnimationFrame(() => scan());
+        }
+        return;
+      }
+
+      const barcode = await detectBarcode(videoEl);
+      if (!barcode?.rawValue) throw new Error('No barcode value');
+
+      console.log('✓ Barcode detected:', barcode.rawValue);
+
+      window.cancelAnimationFrame(rafId);
+      if (scanInstructionsEl) scanInstructionsEl.hidden = true;
+      if (scanBtn) scanBtn.hidden = false;
+      if (scanFrameEl) scanFrameEl.hidden = true;
+
+      beep(200, 860, 0.03);
+      vibrate();
+
+      // Handle the barcode - add to fridge
+      await handleBarcodeDetected(barcode.rawValue);
+      return;
+    } catch {}
+
+    if (shouldRepeatScan) {
+      rafId = window.requestAnimationFrame(() => scan());
+    }
+  }
+
+  // Handle barcode detection - add to fridge
+  async function handleBarcodeDetected(barcode) {
+    // Check if product exists
+    const product = await getProductByBarcode(barcode);
+
+    if (product) {
+      // Product exists, add directly
+      try {
+        await addToFridge(currentFridgeCode, barcode, product.name, 1);
+        toastAlert(`${product.name} lagt til!`, 'success');
+      } catch (err) {
+        toastAlert('Kunne ikke legge til: ' + err.message, 'danger');
+      }
+    } else {
+      // Ask for product name
+      showProductDialog(barcode);
+    }
+  }
+
+  // Show product dialog
+  function showProductDialog(barcode) {
+    if (!productDialog) return;
+    productBarcodeInput.value = barcode;
+    productNameInput.value = '';
+    productQuantityInput.value = '1';
+    productDialog.showModal();
+    productNameInput.focus();
+  }
+
+  // Handle product form submit
+  async function handleAddProduct() {
+    const barcode = productBarcodeInput?.value;
+    const name = productNameInput?.value?.trim();
+    const quantity = parseInt(productQuantityInput?.value) || 1;
+
+    if (!barcode || !name) return;
+
+    try {
+      // Save product
+      await createProduct(barcode, name);
+      // Add to fridge
+      await addToFridge(currentFridgeCode, barcode, name, quantity);
+      productDialog?.close();
+      toastAlert(`${name} lagt til!`, 'success');
+    } catch (err) {
+      toastAlert('Feil: ' + err.message, 'danger');
+    }
+  }
+
+  // Event: Video starts playing
+  capturePhotoEl?.addEventListener('capture-photo:video-play', evt => {
+    scanFrameEl.hidden = false;
+    capturePhotoVideoEl = evt.detail.video || capturePhotoEl.shadowRoot?.querySelector('video');
+    resizeScanFrame(capturePhotoVideoEl);
+    scan();
+
+    // Setup zoom if available
+    const trackSettings = capturePhotoEl.getTrackSettings();
+    const trackCapabilities = capturePhotoEl.getTrackCapabilities();
+    const zoomLevelEl = document.getElementById('zoomLevel');
+    const zoomControls = document.getElementById('zoomControls');
+
+    if (trackSettings?.zoom && trackCapabilities?.zoom) {
+      const minZoom = trackCapabilities.zoom.min || 1;
+      const maxZoom = trackCapabilities.zoom.max || 10;
+      let currentZoom = trackSettings.zoom || 1;
+
+      if (zoomControls) zoomControls.hidden = false;
+      if (zoomLevelEl) zoomLevelEl.textContent = currentZoom;
+
+      zoomControls?.addEventListener('click', evt => {
+        const action = evt.target.closest('button')?.dataset.action;
+        if (action === 'zoom-in' && currentZoom < maxZoom) currentZoom += 0.5;
+        if (action === 'zoom-out' && currentZoom > minZoom) currentZoom -= 0.5;
+        if (zoomLevelEl) zoomLevelEl.textContent = currentZoom;
+        capturePhotoEl.zoom = currentZoom;
+      });
+    }
+  });
+
+  // Event: Scan button click
+  scanBtn?.addEventListener('click', () => {
+    scanBtn.hidden = true;
+    scanFrameEl.hidden = false;
+    cameraResultsEl?.close();
+    shouldRepeatScan = true;
+    scan();
+  });
+
+  // Event: Settings
+  settingsBtn?.addEventListener('click', () => settingsDialog?.showModal());
+  
+  settingsDialog?.addEventListener('click', evt => {
+    if (evt.target === evt.currentTarget) settingsDialog.close();
+  });
+
+  settingsForm?.addEventListener('change', evt => {
+    const settings = {};
+    settingsForm.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      settings[cb.name] = cb.checked;
+    });
+    setSettings(settings);
+  });
+
+  // Event: Product form
+  productForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await handleAddProduct();
+  });
+
+  document.getElementById('skipProductBtn')?.addEventListener('click', () => {
+    productDialog?.close();
+  });
+
+  productDialog?.addEventListener('click', evt => {
+    if (evt.target === evt.currentTarget) productDialog.close();
+  });
+
+}());

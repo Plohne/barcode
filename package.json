@@ -2,12 +2,12 @@
   "name": "barcode-scanner",
   "version": "1.0.0",
   "description": "A Progressive Web Application (PWA) that scans barcodes of various formats, using the Barcode Detection API.",
-  "source": "src/index.html",
+  "source": ["src/index.html", "src/scanner.html", "src/inventory.html", "src/privacy.html"],
   "scripts": {
     "lint": "eslint . --ext .js",
     "clean": "rimraf docs .parcel-cache",
     "generateSW": "workbox generateSW",
-    "start": "parcel",
+    "start": "parcel src/index.html src/scanner.html src/inventory.html src/privacy.html",
     "build:parcel": "parcel build --dist-dir=docs --public-url=./",
     "build": "npm-run-all clean build:parcel",
     "postbuild": "npm run generateSW"

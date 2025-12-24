@@ -1,166 +1,281 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><!DOCTYPE html>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode/QR code Scanner</title>
-  <meta name="description"
-    content="A Progressive Web Application (PWA) that scans barcodes of various formats, using the Barcode Detection API.">
-  <link rel="shortcut icon" href="assets/app-icons/favicon.ico">
-  <link rel="apple-touch-icon" href="assets/app-icons/apple-touch-icon.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#212529">
-  <meta name="color-scheme" content="light dark">
-  <link rel="stylesheet" href="css/water.css">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/cookie-consent.css">
-  <link rel="stylesheet" href="css/fridge.css">
-  <script src="./js/navbar.js"></script>
-  <link rel="stylesheet" href="./css/navbar.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
+<html lang="no"><html lang="no">
 
-<body>
-  <div class="topnav" id="myTopnav">
-    <a href="index.html">Home</a>
-    <a href="#scanner" class="active">Scanner</a>
-    <a href="javascript:void(0);" class="icon" onclick="navBarButton()">
-      <i class="fa fa-bars"></i>
-    </a>
-  </div>
-  <noscript>
-    <div class="noscript">
-      JavaScript is required to properly view this site.
-    </div>
-  </noscript>
 
-  <div class="global-actions" id="globalActions">
-    <button id="fridgeBtn" title="Kjøleskap">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-        <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-12zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v12a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 14.5v-12z"/>
-        <path d="M5 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/>
-        <path d="M4 7h8v1H4z"/>
-      </svg>
-      <span id="fridgeBtnText">Kjøleskap</span>
-    </button>
 
-    <button id="historyBtn" title="History">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock"
-        viewBox="0 0 16 16">
-        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z" />
-        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z" />
-      </svg>
-      <span>History</span>
-    </button>
+<head><head>
 
-    <button id="settingsBtn" title="Settings">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sliders2"
-        viewBox="0 0 16 16">
-        <path fill-rule="evenodd"
-          d="M10.5 1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4H1.5a.5.5 0 0 1 0-1H10V1.5a.5.5 0 0 1 .5-.5ZM12 3.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Zm-6.5 2A.5.5 0 0 1 6 6v1.5h8.5a.5.5 0 0 1 0 1H6V10a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5ZM1 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 1 8Zm9.5 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V13H1.5a.5.5 0 0 1 0-1H10v-1.5a.5.5 0 0 1 .5-.5Zm1.5 2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5Z" />
-      </svg>
-      <span>Settings</span>
-    </button>
-  </div>
+  <meta charset="UTF-8">  <meta charset="UTF-8">
 
-  <dialog id="historyDialog" class="modal history-modal">
-    <header>
-      History
-      <form method="dialog">
-        <button type="submit">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg"
-            viewBox="0 0 16 16">
-            <path
-              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
-          </svg>
-          <span class="visually-hidden">Close</span>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Skann strekkode</title>  <title>Skann strekkode</title>
+
+  <meta name="description" content="Skann strekkoder for å legge til varer i kjøleskapet">  <meta name="description" content="Skann strekkoder for å legge til varer i kjøleskapet">
+
+  <link rel="shortcut icon" href="assets/app-icons/favicon.ico">  <link rel="shortcut icon" href="assets/app-icons/favicon.ico">
+
+  <link rel="apple-touch-icon" href="assets/app-icons/apple-touch-icon.png">  <link rel="apple-touch-icon" href="assets/app-icons/apple-touch-icon.png">
+
+  <link rel="manifest" href="manifest.webmanifest">  <link rel="manifest" href="manifest.webmanifest">
+
+  <meta name="theme-color" content="#1a1a2e">  <meta name="theme-color" content="#1a1a2e">
+
+  <meta name="color-scheme" content="dark">  <meta name="color-scheme" content="dark">
+
+  <link rel="stylesheet" href="css/scanner.css">  <link rel="stylesheet" href="css/scanner.css">
+
+</head></head>
+
+
+
+<body><body>
+
+  <noscript>  <noscript>
+
+    <div class="noscript">    <div class="noscript">
+
+      JavaScript er påkrevd for å bruke denne appen.      JavaScript er påkrevd for å bruke denne appen.
+
+    </div>    </div>
+
+  </noscript>  </noscript>
+
+
+
+  <!-- Header -->  <!-- Header -->
+
+  <header class="scanner-header">  <header class="scanner-header">
+
+    <a href="inventory.html" class="back-btn" title="Tilbake til kjøleskap">    <a href="inventory.html" class="back-btn" title="Tilbake til kjøleskap">
+
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+
+        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+
+      </svg>      </svg>
+
+    </a>    </a>
+
+    <h1>Skann strekkode</h1>    <h1>Skann strekkode</h1>
+
+    <button id="settingsBtn" class="settings-btn" type="button" title="Innstillinger">    <button id="settingsBtn" class="settings-btn" title="Innstillinger">
+
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+
+        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+
+        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+
+      </svg>      </svg>
+
+    </button>    </button>
+
+  </header>  </header>
+
+
+
+  <!-- Toast container -->  <!-- Toast container -->
+
+  <div id="toastContainer" class="toast-container"></div>  <div id="toastContainer" class="toast-container"></div>
+
+
+
+  <!-- Camera view -->  <!-- Settings Dialog -->
+
+  <main class="camera-container">  <dialog id="settingsDialog" class="modal">
+
+    <resize-observer>    <div class="modal-content">
+
+      <capture-photo facing-mode="environment" no-image auto-play>      <header class="modal-header">
+
+        <button type="button" id="scanBtn" class="scan-button" hidden>        <h2>Innstillinger</h2>
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">        <button type="button" class="close-btn" onclick="this.closest('dialog').close()">
+
+            <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5zM3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0v-7zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0v-7zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0v-7zm2 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-7zm3 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0v-7z"/>          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+
+          </svg>            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+
+          Trykk for å skanne igjen          </svg>
+
+        </button>        </button>
+
+        <span slot="capture-button" hidden></span>      </header>
+
+        <span slot="facing-mode-button-content" title="Bytt kamera">      <form name="settings-form" class="settings-form">
+
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="22" height="22">        <label class="setting-item">
+
+            <path d="M350.54 148.68l-26.62-42.06C318.31 100.08 310.62 96 302 96h-92c-8.62 0-16.31 4.08-21.92 10.62l-26.62 42.06C155.85 155.23 148.62 160 140 160H80a32 32 0 00-32 32v192a32 32 0 0032 32h352a32 32 0 0032-32V192a32 32 0 00-32-32h-59c-8.65 0-16.85-4.77-22.46-11.32z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>          <input type="checkbox" name="beep" checked>
+
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M124 158v-22h-24v22M335.76 285.22v-13.31a80 80 0 00-131-61.6M176 258.78v13.31a80 80 0 00130.73 61.8"/>          <span>Pip ved skanning</span>
+
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M196 272l-20-20-20 20M356 272l-20 20-20-20"/>        </label>
+
+          </svg>        <label class="setting-item">
+
+        </span>          <input type="checkbox" name="vibrate" checked>
+
+        <div slot="actions">          <span>Vibrer ved skanning</span>
+
+          <div class="zoom-controls" id="zoomControls" hidden>        </label>
+
+            <button type="button" title="Zoom ut" data-action="zoom-out">−</button>      </form>
+
+            <span id="zoomLevel">1</span>x    </div>
+
+            <button type="button" title="Zoom inn" data-action="zoom-in">+</button>  </dialog>
+
+          </div>
+
+        </div>  <!-- Product Dialog -->
+
+      </capture-photo>  <dialog id="productDialog" class="modal">
+
+    </resize-observer>    <div class="modal-content">
+
+      <header class="modal-header">
+
+    <div id="scanFrame" class="scan-frame" hidden>        <h2>Ny vare</h2>
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">        <button type="button" class="close-btn" id="skipProductBtn">
+
+        <path d="M336 448h56a56 56 0 0056-56v-56M448 176v-56a56 56 0 00-56-56h-56M176 448h-56a56 56 0 01-56-56v-56M64 176v-56a56 56 0 0156-56h56" fill="none" stroke="#00ff00" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/>          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+
+      </svg>            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+
+    </div>          </svg>
+
         </button>
-      </form>
-    </header>
 
-    <ul id="historyList"></ul>
+    <div id="scanInstructions" class="scan-instructions" hidden>      </header>
 
-    <button type="button" id="deleteHistoryBtn">Delete history</button>
-  </dialog>
+      <p>Hold strekkoden i rammen</p>      <form id="productForm" class="product-form">
 
-  <dialog id="settingsDialog" class="modal settings-modal">
-    <header>
-      Settings
-      <form method="dialog">
-        <button type="submit">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg"
-            viewBox="0 0 16 16">
-            <path
-              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
-          </svg>
-          <span class="visually-hidden">Close</span>
-        </button>
-      </form>
-    </header>
+    </div>        <input type="hidden" id="productBarcode" name="barcode">
 
-    <form name="settings-form" autocomplete="false">
-      <fieldset name="barcode-found-settings">
-        <legend>When barcode is found...</legend>
+  </main>        <div class="form-group">
 
-        <ul>
-          <li><label><input type="checkbox" name="beep"> Beep</label></li>
-          <li><label><input type="checkbox" name="vibrate"> Vibrate (mobile)</label></li>
-          <li><label><input type="checkbox" name="openWebPage"> Open web pages automatically</label></li>
-          <li><label><input type="checkbox" name="openWebPageSameTab"> Open web pages in the same tab</label></li>
-          <li><label><input type="checkbox" name="addToHistory"> Add to history</label></li>
-        </ul>
-      </fieldset>
-    </form>
-  </dialog>
+          <label for="productName">Varenavn</label>
 
-  <header class="site-header">
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 512 512" width="80" height="80" xml:space="preserve" class="logo">
-      <path fill="var(--links)"
-        d="M93.867,51.2H8.533C3.814,51.2,0,55.014,0,59.733v85.333c0,4.719,3.814,8.533,8.533,8.533s8.533-3.814,8.533-8.533v-76.8 h76.8c4.719,0,8.533-3.814,8.533-8.533S98.586,51.2,93.867,51.2z" />
-      <path fill="var(--links)"
-        d="M503.467,51.2h-85.333c-4.719,0-8.533,3.814-8.533,8.533s3.814,8.533,8.533,8.533h76.8v76.8c0,4.719,3.814,8.533,8.533,8.533c4.719,0,8.533-3.814,8.533-8.533V59.733C512,55.014,508.186,51.2,503.467,51.2z" />
-      <path fill="var(--links)"
-        d="M503.467,358.4c-4.719,0-8.533,3.814-8.533,8.533v76.8h-76.8c-4.719,0-8.533,3.814-8.533,8.533s3.814,8.533,8.533,8.533h85.333c4.719,0,8.533-3.814,8.533-8.533v-85.333C512,362.214,508.186,358.4,503.467,358.4z" />
-      <path fill="var(--links)"
-        d="M93.867,443.733h-76.8v-76.8c0-4.719-3.814-8.533-8.533-8.533S0,362.214,0,366.933v85.333c0,4.719,3.814,8.533,8.533,8.533h85.333c4.719,0,8.533-3.814,8.533-8.533S98.586,443.733,93.867,443.733z" />
-      <path fill="var(--links)"
+  <!-- Settings Dialog -->          <input type="text" id="productName" name="name" required placeholder="F.eks. Melk" autocomplete="off">
+
+  <dialog id="settingsDialog" class="modal">        </div>
+
+    <div class="modal-content">        <div class="form-group">
+
+      <header class="modal-header">          <label for="productQuantity">Antall</label>
+
+        <h2>Innstillinger</h2>          <input type="number" id="productQuantity" name="quantity" value="1" min="1" max="99">
+
+        <button type="button" class="close-btn" onclick="this.closest('dialog').close()">        </div>
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">        <button type="submit" class="btn-primary">Legg til</button>
+
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>      </form>
+
+          </svg>    </div>
+
+        </button>  </dialog>
+
+      </header>
+
+      <form name="settings-form" class="settings-form">  <header class="site-header">
+
+        <label class="setting-item">    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+
+          <input type="checkbox" name="beep" checked>      viewBox="0 0 512 512" width="80" height="80" xml:space="preserve" class="logo">
+
+          <span>Pip ved skanning</span>      <path fill="var(--links)"
+
+        </label>        d="M93.867,51.2H8.533C3.814,51.2,0,55.014,0,59.733v85.333c0,4.719,3.814,8.533,8.533,8.533s8.533-3.814,8.533-8.533v-76.8 h76.8c4.719,0,8.533-3.814,8.533-8.533S98.586,51.2,93.867,51.2z" />
+
+        <label class="setting-item">      <path fill="var(--links)"
+
+          <input type="checkbox" name="vibrate" checked>        d="M503.467,51.2h-85.333c-4.719,0-8.533,3.814-8.533,8.533s3.814,8.533,8.533,8.533h76.8v76.8c0,4.719,3.814,8.533,8.533,8.533c4.719,0,8.533-3.814,8.533-8.533V59.733C512,55.014,508.186,51.2,503.467,51.2z" />
+
+          <span>Vibrer ved skanning</span>      <path fill="var(--links)"
+
+        </label>        d="M503.467,358.4c-4.719,0-8.533,3.814-8.533,8.533v76.8h-76.8c-4.719,0-8.533,3.814-8.533,8.533s3.814,8.533,8.533,8.533h85.333c4.719,0,8.533-3.814,8.533-8.533v-85.333C512,362.214,508.186,358.4,503.467,358.4z" />
+
+      </form>      <path fill="var(--links)"
+
+    </div>        d="M93.867,443.733h-76.8v-76.8c0-4.719-3.814-8.533-8.533-8.533S0,362.214,0,366.933v85.333c0,4.719,3.814,8.533,8.533,8.533h85.333c4.719,0,8.533-3.814,8.533-8.533S98.586,443.733,93.867,443.733z" />
+
+  </dialog>      <path fill="var(--links)"
+
         d="M503.467,247.467H8.533C3.814,247.467,0,251.281,0,256s3.814,8.533,8.533,8.533h494.933c4.719,0,8.533-3.814,8.533-8.533S508.186,247.467,503.467,247.467z" />
-      <path fill="currentColor"
-        d="M119.467,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C128,123.29,124.177,119.467,119.467,119.467z" />
-      <path fill="currentColor"
-        d="M153.6,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C162.133,123.29,158.31,119.467,153.6,119.467z" />
-      <path fill="currentColor"
-        d="M187.733,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C196.267,123.29,192.444,119.467,187.733,119.467z" />
-      <path fill="currentColor"
-        d="M221.867,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C230.4,123.29,226.577,119.467,221.867,119.467z" />
-      <path fill="currentColor"
-        d="M256,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C264.533,123.29,260.71,119.467,256,119.467z" />
-      <path fill="currentColor"
-        d="M290.133,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C298.667,123.29,294.844,119.467,290.133,119.467z" />
-      <path fill="currentColor"
-        d="M324.267,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C332.8,123.29,328.977,119.467,324.267,119.467z" />
-      <path fill="currentColor"
-        d="M358.4,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C366.933,123.29,363.11,119.467,358.4,119.467z" />
-      <path fill="currentColor"
-        d="M392.533,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C401.067,123.29,397.244,119.467,392.533,119.467z" />
-      <path fill="currentColor"
-        d="M119.467,281.6c-4.71,0-8.533,3.823-8.533,8.533v110.933c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V290.133C128,285.423,124.177,281.6,119.467,281.6z" />
-      <path fill="currentColor"
-        d="M153.6,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533v-93.867C162.133,285.423,158.31,281.6,153.6,281.6z" />
-      <path fill="currentColor"
-        d="M187.733,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C196.267,285.423,192.444,281.6,187.733,281.6z" />
-      <path fill="currentColor"
+
+  <!-- Product Dialog -->      <path fill="currentColor"
+
+  <dialog id="productDialog" class="modal">        d="M119.467,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C128,123.29,124.177,119.467,119.467,119.467z" />
+
+    <div class="modal-content">      <path fill="currentColor"
+
+      <header class="modal-header">        d="M153.6,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C162.133,123.29,158.31,119.467,153.6,119.467z" />
+
+        <h2>Ny vare</h2>      <path fill="currentColor"
+
+        <button type="button" class="close-btn" id="skipProductBtn">        d="M187.733,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C196.267,123.29,192.444,119.467,187.733,119.467z" />
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">      <path fill="currentColor"
+
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>        d="M221.867,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C230.4,123.29,226.577,119.467,221.867,119.467z" />
+
+          </svg>      <path fill="currentColor"
+
+        </button>        d="M256,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C264.533,123.29,260.71,119.467,256,119.467z" />
+
+      </header>      <path fill="currentColor"
+
+      <form id="productForm" class="product-form">        d="M290.133,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C298.667,123.29,294.844,119.467,290.133,119.467z" />
+
+        <input type="hidden" id="productBarcode" name="barcode">      <path fill="currentColor"
+
+        <div class="form-group">        d="M324.267,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C332.8,123.29,328.977,119.467,324.267,119.467z" />
+
+          <label for="productName">Varenavn</label>      <path fill="currentColor"
+
+          <input type="text" id="productName" name="name" required placeholder="F.eks. Melk" autocomplete="off">        d="M358.4,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V128C366.933,123.29,363.11,119.467,358.4,119.467z" />
+
+        </div>      <path fill="currentColor"
+
+        <div class="form-group">        d="M392.533,119.467c-4.71,0-8.533,3.823-8.533,8.533v93.867c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V128C401.067,123.29,397.244,119.467,392.533,119.467z" />
+
+          <label for="productQuantity">Antall</label>      <path fill="currentColor"
+
+          <input type="number" id="productQuantity" name="quantity" value="1" min="1" max="99">        d="M119.467,281.6c-4.71,0-8.533,3.823-8.533,8.533v110.933c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533V290.133C128,285.423,124.177,281.6,119.467,281.6z" />
+
+        </div>      <path fill="currentColor"
+
+        <button type="submit" class="btn-primary">Legg til</button>        d="M153.6,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533v-93.867C162.133,285.423,158.31,281.6,153.6,281.6z" />
+
+      </form>      <path fill="currentColor"
+
+    </div>        d="M187.733,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C196.267,285.423,192.444,281.6,187.733,281.6z" />
+
+  </dialog>      <path fill="currentColor"
+
         d="M221.867,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533v-93.867C230.4,285.423,226.577,281.6,221.867,281.6z" />
+
+  <!-- Camera Results (hidden, for barcode detection internals) -->      <path fill="currentColor"
+
+  <dialog id="cameraResults" class="results" hidden></dialog>        d="M256,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C264.533,285.423,260.71,281.6,256,281.6z" />
+
       <path fill="currentColor"
-        d="M256,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C264.533,285.423,260.71,281.6,256,281.6z" />
-      <path fill="currentColor"
-        d="M290.133,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C298.667,285.423,294.844,281.6,290.133,281.6z" />
-      <path fill="currentColor"
+
+  <script src="./js/scanner.js" type="module"></script>        d="M290.133,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C298.667,285.423,294.844,281.6,290.133,281.6z" />
+
+</body>      <path fill="currentColor"
+
         d="M324.267,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533S332.8,388.71,332.8,384v-93.867C332.8,285.423,328.977,281.6,324.267,281.6z" />
-      <path fill="currentColor"
+
+</html>      <path fill="currentColor"
+
         d="M358.4,281.6c-4.71,0-8.533,3.823-8.533,8.533V384c0,4.71,3.823,8.533,8.533,8.533s8.533-3.823,8.533-8.533v-93.867C366.933,285.423,363.11,281.6,358.4,281.6z" />
       <path fill="currentColor"
         d="M392.533,281.6c-4.71,0-8.533,3.823-8.533,8.533v110.933c0,4.71,3.823,8.533,8.533,8.533c4.71,0,8.533-3.823,8.533-8.533V290.133C401.067,285.423,397.244,281.6,392.533,281.6z" />

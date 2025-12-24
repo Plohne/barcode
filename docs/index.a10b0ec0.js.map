@@ -1,1 +1,0 @@
-{"mappings":"","sources":["src/js/navbar.js"],"sourcesContent":["function navBarButton() {\r\n  var x = document.getElementById(\"myTopnav\");\r\n  if (x.className === \"topnav\") {\r\n    x.className += \" responsive\";\r\n  } else {\r\n    x.className = \"topnav\";\r\n  }\r\n}"],"names":[],"version":3,"file":"index.a10b0ec0.js.map"}

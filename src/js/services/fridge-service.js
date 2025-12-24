@@ -26,6 +26,27 @@ const simpleHash = async (str) => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
+// Find fridge by password (for login page)
+export const findFridgeByPassword = async (password) => {
+  if (!password) return null;
+  
+  const passwordHash = await simpleHash(password);
+  const fridgesRef = collection(db, 'fridges');
+  const q = query(fridgesRef, where('passwordHash', '==', passwordHash));
+  const querySnapshot = await getDocs(q);
+  
+  if (querySnapshot.empty) {
+    return null;
+  }
+  
+  // Return the first matching fridge
+  const fridgeDoc = querySnapshot.docs[0];
+  return {
+    code: fridgeDoc.id,
+    ...fridgeDoc.data()
+  };
+};
+
 // Local storage key for current fridge
 const CURRENT_FRIDGE_KEY = 'barcode-scanner/currentFridge';
 
