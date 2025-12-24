@@ -21,12 +21,18 @@ export const getProductByBarcode = async (barcode) => {
 
 // Create new product in global catalog
 export const createProduct = async (barcode, productData) => {
+  // Handle both string (name only) and object formats
+  const name = typeof productData === 'string' ? productData : productData?.name;
+  const description = typeof productData === 'object' ? (productData?.description || '') : '';
+  const imageUrl = typeof productData === 'object' ? (productData?.imageUrl || null) : null;
+  const category = typeof productData === 'object' ? (productData?.category || 'uncategorized') : 'uncategorized';
+  
   const product = {
     barcode,
-    name: productData.name,
-    description: productData.description || '',
-    imageUrl: productData.imageUrl || null,
-    category: productData.category || 'uncategorized',
+    name,
+    description,
+    imageUrl,
+    category,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   };

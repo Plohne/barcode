@@ -9,7 +9,7 @@ import {
   getCurrentFridgeCode,
   addToFridge
 } from './services/fridge-service.js';
-import { getProductByBarcode, createProduct } from './services/product-service.js';
+import { getProductByBarcode, createProduct, updateProduct } from './services/product-service.js';
 
 // Simple toast function
 function showToast(message, type = 'success') {
@@ -170,33 +170,29 @@ function showToast(message, type = 'success') {
     }
   }
 
-  // Handle barcode detection - add to fridge
+  // Handle barcode detection - always show dialog, pre-fill if product exists
   async function handleBarcodeDetected(barcode) {
     // Check if product exists
     const product = await getProductByBarcode(barcode);
-
-    if (product) {
-      // Product exists, add directly
-      try {
-        await addToFridge(currentFridgeCode, barcode, product.name, 1);
-        showToast(`${product.name} lagt til!`, 'success');
-      } catch (err) {
-        showToast('Kunne ikke legge til: ' + err.message, 'danger');
-      }
-    } else {
-      // Ask for product name
-      showProductDialog(barcode);
-    }
+    // Always show dialog, pre-fill name if product exists
+    showProductDialog(barcode, product?.name || '');
   }
 
-  // Show product dialog
-  function showProductDialog(barcode) {
+  // Show product dialog with optional pre-filled name
+  function showProductDialog(barcode, existingName = '') {
     if (!productDialog) return;
     productBarcodeInput.value = barcode;
-    productNameInput.value = '';
+    productNameInput.value = existingName;
     productQuantityInput.value = '1';
     productDialog.showModal();
-    productNameInput.focus();
+    
+    if (existingName) {
+      // If name is pre-filled, focus on quantity instead
+      productQuantityInput.focus();
+      productQuantityInput.select();
+    } else {
+      productNameInput.focus();
+    }
   }
 
   // Handle product form submit
@@ -208,8 +204,19 @@ function showToast(message, type = 'success') {
     if (!barcode || !name) return;
 
     try {
-      // Save product
-      await createProduct(barcode, name);
+      // Check if product exists to see if we need to update
+      const existingProduct = await getProductByBarcode(barcode);
+      
+      if (existingProduct) {
+        // Product exists - update name if changed
+        if (existingProduct.name !== name) {
+          await updateProduct(barcode, { name });
+        }
+      } else {
+        // Create new product
+        await createProduct(barcode, name);
+      }
+      
       // Add to fridge
       await addToFridge(currentFridgeCode, barcode, name, quantity);
       productDialog?.close();
