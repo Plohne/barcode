@@ -18,13 +18,15 @@
   </header>
   <div id="toastContainer" class="toast-container"></div>
   <main class="camera-container">
-    <resize-observer>
-      <capture-photo facing-mode="environment" no-image auto-play>
-        <span slot="capture-button" hidden></span>
-        <span slot="facing-mode-button" hidden></span>
-      </capture-photo>
-    </resize-observer>
-    <div id="scanFrame" class="scan-frame"></div>
+    <div class="camera-viewport">
+      <resize-observer>
+        <capture-photo facing-mode="environment" no-image auto-play>
+          <span slot="capture-button" hidden></span>
+          <span slot="facing-mode-button" hidden></span>
+        </capture-photo>
+      </resize-observer>
+      <div id="scanFrame" class="scan-frame"></div>
+    </div>
     <p id="scanInstructions" class="scan-instructions">Hold strekkoden i rammen</p>
   </main>
   <dialog id="settingsDialog" class="modal">

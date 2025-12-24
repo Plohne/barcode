@@ -13,7 +13,7 @@ html, body {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #0a0a0a;
+  background-color: #121212;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -59,15 +59,29 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Camera Container */
+/* Camera Container - Small centered box */
 .camera-container {
   flex: 1;
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: #121212;
+  padding: 20px;
+}
+
+/* Camera viewport - small box */
+.camera-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 220px;
+  border-radius: 16px;
+  overflow: hidden;
   background: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 resize-observer {
@@ -88,17 +102,16 @@ capture-photo::part(video) {
   object-fit: cover;
 }
 
-/* Scan Frame Overlay */
+/* Scan Frame Overlay - inside camera box */
 .scan-frame {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 280px;
-  height: 160px;
-  border: 3px solid rgba(0, 200, 150, 0.8);
-  border-radius: 12px;
-  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.4);
+  width: 85%;
+  height: 60%;
+  border: 2px solid rgba(0, 200, 150, 0.8);
+  border-radius: 8px;
   pointer-events: none;
 }
 
@@ -118,19 +131,15 @@ capture-photo::part(video) {
   50% { opacity: 1; }
 }
 
-/* Scan Instructions */
+/* Scan Instructions - below camera */
 .scan-instructions {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-  padding: 10px 20px;
+  margin-top: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+  padding: 12px 24px;
   border-radius: 20px;
   font-size: 14px;
   text-align: center;
-  white-space: nowrap;
 }
 
 /* Toast Container */
