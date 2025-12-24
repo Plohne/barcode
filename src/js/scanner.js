@@ -1,9 +1,7 @@
 // src/js/scanner.js - Simplified scanner for fridge app
 import '@georapbox/resize-observer-element/dist/resize-observer-defined.js';
-import { CapturePhoto } from '@georapbox/capture-photo-element/dist/capture-photo.js';
+import '@georapbox/capture-photo-element/dist/capture-photo-defined.js';
 import { getSettings, setSettings } from './services/storage.js';
-import { toastAlert } from './toast-alert.js';
-import './custom-clipboard-copy.js';
 
 // Firebase / Fridge imports
 import { initializeFirebase } from './services/firebase-config.js';
@@ -12,6 +10,19 @@ import {
   addToFridge
 } from './services/fridge-service.js';
 import { getProductByBarcode, createProduct } from './services/product-service.js';
+
+// Simple toast function
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  
+  setTimeout(() => toast.remove(), 3000);
+}
 
 (async function () {
   // Check if logged in
@@ -53,7 +64,7 @@ import { getProductByBarcode, createProduct } from './services/product-service.j
       await import('barcode-detector');
       console.log('Using BarcodeDetector polyfill.');
     } catch (err) {
-      return toastAlert('Strekkodeskanning støttes ikke i denne nettleseren.', 'danger');
+      return showToast('Strekkodeskanning støttes ikke i denne nettleseren.', 'danger');
     }
   }
 
@@ -168,9 +179,9 @@ import { getProductByBarcode, createProduct } from './services/product-service.j
       // Product exists, add directly
       try {
         await addToFridge(currentFridgeCode, barcode, product.name, 1);
-        toastAlert(`${product.name} lagt til!`, 'success');
+        showToast(`${product.name} lagt til!`, 'success');
       } catch (err) {
-        toastAlert('Kunne ikke legge til: ' + err.message, 'danger');
+        showToast('Kunne ikke legge til: ' + err.message, 'danger');
       }
     } else {
       // Ask for product name
@@ -202,9 +213,9 @@ import { getProductByBarcode, createProduct } from './services/product-service.j
       // Add to fridge
       await addToFridge(currentFridgeCode, barcode, name, quantity);
       productDialog?.close();
-      toastAlert(`${name} lagt til!`, 'success');
+      showToast(`${name} lagt til!`, 'success');
     } catch (err) {
-      toastAlert('Feil: ' + err.message, 'danger');
+      showToast('Feil: ' + err.message, 'danger');
     }
   }
 

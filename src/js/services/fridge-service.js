@@ -31,9 +31,13 @@ export const findFridgeByPassword = async (password) => {
   if (!password) return null;
   
   const passwordHash = await simpleHash(password);
+  console.log('Looking for password hash:', passwordHash);
+  
   const fridgesRef = collection(db, 'fridges');
   const q = query(fridgesRef, where('passwordHash', '==', passwordHash));
   const querySnapshot = await getDocs(q);
+  
+  console.log('Query returned', querySnapshot.size, 'documents');
   
   if (querySnapshot.empty) {
     return null;
@@ -41,6 +45,7 @@ export const findFridgeByPassword = async (password) => {
   
   // Return the first matching fridge
   const fridgeDoc = querySnapshot.docs[0];
+  console.log('Found fridge:', fridgeDoc.id);
   return {
     code: fridgeDoc.id,
     ...fridgeDoc.data()
