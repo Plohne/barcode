@@ -1,6 +1,6 @@
 // src/js/login.js
 import { initializeFirebase } from './services/firebase-config.js';
-import { findFridgeByPassword, setCurrentFridgeCode } from './services/fridge-service.js';
+import { findFridgeByPassword, setCurrentFridgeCode, getCurrentFridgeCode } from './services/fridge-service.js';
 
 const loginForm = document.getElementById('loginForm');
 const passwordInput = document.getElementById('password');
@@ -10,7 +10,7 @@ const btnSpinner = loginBtn?.querySelector('.btn-spinner');
 const loginError = document.getElementById('loginError');
 
 // Check if already logged in
-const savedFridge = localStorage.getItem('current_fridge_code');
+const savedFridge = getCurrentFridgeCode();
 if (savedFridge) {
   // Already logged in, redirect to inventory
   window.location.href = 'inventory.html';
@@ -34,14 +34,14 @@ loginForm?.addEventListener('submit', async (e) => {
   hideError();
 
   try {
-    const result = await findFridgeByPassword(password);
+    const fridge = await findFridgeByPassword(password);
     
-    if (result.success && result.fridgeCode) {
+    if (fridge && fridge.code) {
       // Save fridge code and redirect
-      setCurrentFridgeCode(result.fridgeCode);
+      setCurrentFridgeCode(fridge.code);
       window.location.href = 'inventory.html';
     } else {
-      showError(result.error || 'Feil passord. Prøv igjen.');
+      showError('Feil passord. Prøv igjen.');
     }
   } catch (err) {
     console.error('Login error:', err);
