@@ -217,8 +217,8 @@ function showToast(message, type = 'success') {
         await createProduct(barcode, name);
       }
       
-      // Add to fridge
-      await addToFridge(currentFridgeCode, barcode, name, quantity);
+      // Add to fridge with quantity
+      await addToFridge(barcode, { name }, quantity);
       productDialog?.close();
       showToast(`${name} lagt til!`, 'success');
     } catch (err) {

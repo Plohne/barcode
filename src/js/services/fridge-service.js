@@ -163,7 +163,7 @@ export const getFridgeItems = async () => {
 };
 
 // Add item to fridge
-export const addToFridge = async (barcode, productData = {}) => {
+export const addToFridge = async (barcode, productData = {}, quantity = 1) => {
   const fridgeCode = getCurrentFridgeCode();
   if (!fridgeCode) throw new Error('No fridge selected');
   
@@ -177,11 +177,12 @@ export const addToFridge = async (barcode, productData = {}) => {
     // Item exists, increment quantity
     const existingDoc = existingSnapshot.docs[0];
     await updateDoc(existingDoc.ref, {
-      quantity: increment(1),
+      quantity: increment(quantity),
+      productName: productData.name || existingDoc.data().productName, // Update name if provided
       updatedAt: serverTimestamp()
     });
     const data = existingDoc.data();
-    return { id: existingDoc.id, ...data, quantity: data.quantity + 1 };
+    return { id: existingDoc.id, ...data, quantity: data.quantity + quantity };
   }
   
   // Add new item
@@ -189,7 +190,7 @@ export const addToFridge = async (barcode, productData = {}) => {
     barcode,
     productName: productData.name || 'Unknown Product',
     productImageUrl: productData.imageUrl || null,
-    quantity: 1,
+    quantity: quantity,
     addedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     expiryDate: productData.expiryDate || null,

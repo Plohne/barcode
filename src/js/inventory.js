@@ -106,20 +106,20 @@ function renderItems(items) {
 
       if (action === 'remove') {
         if (confirm('Fjerne fra kjøleskapet?')) {
-          await removeFromFridge(currentFridgeCode, itemId);
+          await removeFromFridge(itemId);
           await loadItems();
         }
       } else if (action === 'increase') {
-        await updateFridgeItemQuantity(currentFridgeCode, itemId, item.quantity + 1);
+        await updateFridgeItemQuantity(itemId, item.quantity + 1);
         await loadItems();
       } else if (action === 'decrease') {
         if (item.quantity <= 1) {
           if (confirm('Fjerne fra kjøleskapet?')) {
-            await removeFromFridge(currentFridgeCode, itemId);
+            await removeFromFridge(itemId);
             await loadItems();
           }
         } else {
-          await updateFridgeItemQuantity(currentFridgeCode, itemId, item.quantity - 1);
+          await updateFridgeItemQuantity(itemId, item.quantity - 1);
           await loadItems();
         }
       }
