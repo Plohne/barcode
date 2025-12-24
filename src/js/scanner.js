@@ -33,9 +33,8 @@ function showToast(message, type = 'success') {
   }
 
   const capturePhotoEl = document.querySelector('capture-photo');
-  const cameraResultsEl = document.getElementById('cameraResults');
   const scanInstructionsEl = document.getElementById('scanInstructions');
-  const scanBtn = document.getElementById('scanBtn');
+  const rescanBtn = document.getElementById('rescanBtn');
   const scanFrameEl = document.getElementById('scanFrame');
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsDialog = document.getElementById('settingsDialog');
@@ -47,6 +46,7 @@ function showToast(message, type = 'success') {
   const productQuantityInput = document.getElementById('productQuantity');
 
   let shouldRepeatScan = true;
+  let isScanning = false;
   let rafId;
   let capturePhotoVideoEl = null;
 
@@ -155,9 +155,29 @@ function showToast(message, type = 'success') {
     });
   }
 
+  // Start scanning
+  function startScanning() {
+    shouldRepeatScan = true;
+    isScanning = true;
+    if (rescanBtn) rescanBtn.hidden = true;
+    if (scanFrameEl) scanFrameEl.hidden = false;
+    if (scanInstructionsEl) scanInstructionsEl.hidden = false;
+    scan();
+  }
+
+  // Stop scanning
+  function stopScanning() {
+    shouldRepeatScan = false;
+    isScanning = false;
+    window.cancelAnimationFrame(rafId);
+    if (rescanBtn) rescanBtn.hidden = false;
+    if (scanFrameEl) scanFrameEl.hidden = true;
+    if (scanInstructionsEl) scanInstructionsEl.hidden = true;
+  }
+
   // Main scan loop
   async function scan() {
-    if (scanInstructionsEl) scanInstructionsEl.hidden = false;
+    if (!isScanning) return;
 
     try {
       const videoEl = getVideoElement();
@@ -173,10 +193,8 @@ function showToast(message, type = 'success') {
 
       console.log('✓ Barcode detected:', barcode.rawValue);
 
-      window.cancelAnimationFrame(rafId);
-      if (scanInstructionsEl) scanInstructionsEl.hidden = true;
-      if (scanBtn) scanBtn.hidden = false;
-      if (scanFrameEl) scanFrameEl.hidden = true;
+      // Stop scanning temporarily
+      stopScanning();
 
       beep(200, 860, 0.03);
       vibrate();
@@ -249,10 +267,9 @@ function showToast(message, type = 'success') {
 
   // Event: Video starts playing
   capturePhotoEl?.addEventListener('capture-photo:video-play', evt => {
-    scanFrameEl.hidden = false;
     capturePhotoVideoEl = evt.detail.video || capturePhotoEl.shadowRoot?.querySelector('video');
     resizeScanFrame(capturePhotoVideoEl);
-    scan();
+    startScanning();
 
     // Setup zoom if available
     const trackSettings = capturePhotoEl.getTrackSettings();
@@ -266,25 +283,21 @@ function showToast(message, type = 'success') {
       let currentZoom = trackSettings.zoom || 1;
 
       if (zoomControls) zoomControls.hidden = false;
-      if (zoomLevelEl) zoomLevelEl.textContent = currentZoom;
+      if (zoomLevelEl) zoomLevelEl.textContent = currentZoom.toFixed(1);
 
       zoomControls?.addEventListener('click', evt => {
         const action = evt.target.closest('button')?.dataset.action;
         if (action === 'zoom-in' && currentZoom < maxZoom) currentZoom += 0.5;
         if (action === 'zoom-out' && currentZoom > minZoom) currentZoom -= 0.5;
-        if (zoomLevelEl) zoomLevelEl.textContent = currentZoom;
+        if (zoomLevelEl) zoomLevelEl.textContent = currentZoom.toFixed(1);
         capturePhotoEl.zoom = currentZoom;
       });
     }
   });
 
-  // Event: Scan button click
-  scanBtn?.addEventListener('click', () => {
-    scanBtn.hidden = true;
-    scanFrameEl.hidden = false;
-    cameraResultsEl?.close();
-    shouldRepeatScan = true;
-    scan();
+  // Event: Rescan button click
+  rescanBtn?.addEventListener('click', () => {
+    startScanning();
   });
 
   // Event: Settings
@@ -310,10 +323,26 @@ function showToast(message, type = 'success') {
 
   document.getElementById('skipProductBtn')?.addEventListener('click', () => {
     productDialog?.close();
+    // Resume scanning after closing dialog
+    startScanning();
   });
 
   productDialog?.addEventListener('click', evt => {
-    if (evt.target === evt.currentTarget) productDialog.close();
+    if (evt.target === evt.currentTarget) {
+      productDialog.close();
+      // Resume scanning after closing dialog
+      startScanning();
+    }
+  });
+
+  // Resume scanning after successful add
+  productDialog?.addEventListener('close', () => {
+    // Small delay before resuming scan
+    setTimeout(() => {
+      if (!productDialog.open) {
+        startScanning();
+      }
+    }, 500);
   });
 
 }());

@@ -14,6 +14,7 @@
   <header class="scanner-header">
     <a href="inventory.html" class="back-btn">&#8592;</a>
     <h1>Skann strekkode</h1>
+    <button id="rescanBtn" class="rescan-btn" type="button" hidden>Skann</button>
     <button id="settingsBtn" class="settings-btn" type="button">&#9881;</button>
   </header>
   <div id="toastContainer" class="toast-container"></div>
@@ -26,8 +27,13 @@
         </capture-photo>
       </resize-observer>
       <div id="scanFrame" class="scan-frame"></div>
+      <p id="scanInstructions" class="scan-instructions">Hold strekkoden i rammen</p>
+      <div class="zoom-controls" id="zoomControls" hidden>
+        <button type="button" data-action="zoom-out">−</button>
+        <span id="zoomLevel">1.0</span>x
+        <button type="button" data-action="zoom-in">+</button>
+      </div>
     </div>
-    <p id="scanInstructions" class="scan-instructions">Hold strekkoden i rammen</p>
   </main>
   <dialog id="settingsDialog" class="modal">
     <div class="modal-content">
